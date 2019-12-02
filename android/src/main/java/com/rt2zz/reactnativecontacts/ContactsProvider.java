@@ -4,7 +4,7 @@ import android.content.ContentResolver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
-import androidx.annotation.NonNull;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -124,33 +124,6 @@ public class ContactsProvider {
                     ContactsContract.CommonDataKinds.Phone.NUMBER + " LIKE ? OR "
                             + ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER + " LIKE ?",
                     new String[]{"%" + phoneNumber + "%", "%" + phoneNumber + "%"},
-                    null
-            );
-
-            try {
-                matchingContacts = loadContactsFrom(cursor);
-            } finally {
-                if (cursor != null) {
-                    cursor.close();
-                }
-            }
-        }
-
-        WritableArray contacts = Arguments.createArray();
-        for (Contact contact : matchingContacts.values()) {
-            contacts.pushMap(contact.toMap());
-        }
-        return contacts;
-    }
-
-    public WritableArray getContactsByEmailAddress(String emailAddress) {
-        Map<String, Contact> matchingContacts;
-        {
-            Cursor cursor = contentResolver.query(
-                    ContactsContract.Data.CONTENT_URI,
-                    FULL_PROJECTION.toArray(new String[FULL_PROJECTION.size()]),
-                    ContactsContract.CommonDataKinds.Email.ADDRESS + " LIKE ?",
-                    new String[]{"%" + emailAddress + "%"},
                     null
             );
 
@@ -409,43 +382,6 @@ public class ContactsProvider {
                                 label = "other";
                         }
                         contact.emails.add(new Contact.Item(label, email, id));
-                    }
-                    break;
-                case Website.CONTENT_ITEM_TYPE:
-                    String url = cursor.getString(cursor.getColumnIndex(Website.URL));
-                    int websiteType = cursor.getInt(cursor.getColumnIndex(Website.TYPE));
-                    if (!TextUtils.isEmpty(url)) {
-                        String label;
-                        switch (websiteType) {
-                            case Website.TYPE_HOMEPAGE:
-                                label = "homepage";
-                                break;
-                            case Website.TYPE_BLOG:
-                                label = "blog";
-                                break;
-                            case Website.TYPE_PROFILE:
-                                label = "profile";
-                                break;
-                            case Website.TYPE_HOME:
-                                label = "home";
-                                break;
-                            case Website.TYPE_WORK:
-                                label = "work";
-                                break;
-                            case Website.TYPE_FTP:
-                                label = "ftp";
-                                break;
-                            case Website.TYPE_CUSTOM:
-                                if (cursor.getString(cursor.getColumnIndex(Website.LABEL)) != null) {
-                                    label = cursor.getString(cursor.getColumnIndex(Website.LABEL)).toLowerCase();
-                                } else {
-                                    label = "";
-                                }
-                                break;
-                            default:
-                                label = "other";
-                        }
-                        contact.urls.add(new Contact.Item(label, url, id));
                     }
                     break;
                 case Organization.CONTENT_ITEM_TYPE:
